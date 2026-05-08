@@ -1,0 +1,17 @@
+# Pocket Race ♥ Multiplayer — Render Blueprint
+# Deploy: en Render Dashboard → New → Blueprint → conectar repo
+# Render leerá este archivo automáticamente y creará el web service
+
+services:
+  - type: web
+    name: pocket-race
+    runtime: node
+    plan: free
+    region: oregon          # oregon | ohio | virginia | frankfurt | singapore
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true        # redeploya en cada push a la branch
+    envVars:
+      - key: NODE_VERSION
+        value: "20"

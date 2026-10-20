@@ -432,7 +432,7 @@ lazurite unpack build/android/RenderChunk.material.bin -o carpeta
 ## 12. Super-Human (juego propio para Rezona, HTML único)
 
 - Pedido: simulador de superhéroes, mundo abierto vóxel, todo en inglés, sin emojis, para WebView
-  (TCL 20 SE). Entregado **v2** (`Super-Human-v2.html`, ~900 KB, no pide nada a la red). Fase siguiente:
+  (TCL 20 SE). Entregado **v3** (`Super-Human-v3.html`, ~900 KB, no pide nada a la red). Fase siguiente:
   poderes y situaciones (crímenes, rescates). El juego no va al repo; el HTML entregado es la fuente.
 - Motor propio WebGL2, sin librerías. En el HTML, módulos separados por `/*==== módulo: X ====*/`, en orden:
   util, gl, audio, ui, space, voxel, char, anim, charrender, creator, city, props, citymesh, cityrender,
@@ -460,8 +460,11 @@ lazurite unpack build/android/RenderChunk.material.bin -o carpeta
 - Pruebas (Playwright + SwiftShader): `?test=menu|creator|game`; pasos eval/click/key/down/up/wait/shot;
   `Creator.lineup = [specs]` (+ `lineSeq`) para comparar personajes y poses; `World.debugCam = {eye, tgt}`
   para vistas aéreas; CPU frenada ×6 por CDP para medir; juego al azar 75 s sin errores. En GLSL `patch` es
-  palabra reservada. **Adreno (TCL): no indexar con variable un arreglo `const` en GLSL** (v1 no arrancaba:
-  "Link skin: … cannot compute gv size for oob"); SwiftShader no lo detecta. Normales por cálculo.
+  palabra reservada. **Adreno (TCL): ningún arreglo indexado con variable en GLSL, ni `const` ni de uniforms**
+  (v1 y v2 no arrancaban: "Link skin: … cannot compute gv size for oob"; SwiftShader no lo detecta). Huesos y
+  paletas van en texturas RGBA32F leídas con `texelFetch` (una fila por dibujo, `CharGL.begin/draw/flush`);
+  normales por cálculo; sombras sólo en el shader de píxeles. Al arrancar se compilan todos los programas y la
+  pantalla de error lista los que fallen, con build y GPU.
 - Medido: ~25 llamadas de dibujo y ~32 k triángulos en la calle; JS < 1.5 ms por cuadro en PC. El TCL arranca
   en calidad Media (Adreno 610) con resolución adaptable (baja rápido, sube lento).
 

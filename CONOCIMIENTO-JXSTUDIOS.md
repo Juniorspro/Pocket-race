@@ -387,5 +387,45 @@ lazurite unpack build/android/RenderChunk.material.bin -o carpeta
 - Ideas abiertas: auditoría de rendimiento en un M12 real, sombra proyectada barata (sólo con VV),
   modo "Realista" propio para gama alta.
 
+---
+
+## 11. Hajime no Ippo 2: Victorious Road (PS2) → APK nativo
+
+- Pedido del dueño: **APK, no HTML**. Motor propio en C + OpenGL ES 3 con `NativeActivity`
+  (`hasCode="false"`, sin Java). Entregado **v2** (pelea jugable vs CPU). Las fuentes y herramientas van
+  dentro del APK entregado: `assets/fuente.tar.xz` (desarmar el APK = retomar). Nada del juego al repo.
+- ISO (SLPS_252.87, 3 GB) desde Drive: `drive.usercontent.google.com/download?id=…&export=download&confirm=t`.
+  El ELF trae **tabla de símbolos y DWARF 1** (CodeWarrior): nombres de funciones, estructuras con
+  nombres de campo. Lectores propios: `elfsym.py`, `dwarf1.py`, `desens.py` (capstone compilado desde
+  fuente, con extras R5900), `llamadas.py`. Los `.OVR` de DATA son overlays: texto desde 0x40, base 0x4f3380.
+- Formatos (`tools/` en el backup): **PKT** "KP" (árbol anidado de archivos); **BMR** "BR" textura 4/8 bits
+  con paleta: 8 bits subidos como PSMCT32 (w/2×h/2), 4 bits como **PSMCT16** (w/2×h/2), CLUT de 8 bits
+  con CSM1 (bloques 8-15↔16-23); alfa PS2 ×2. Tablas del GS de `GSTables.cpp` de PCSX2.
+  **DFF** RenderWare genérico (no nativo) con Skin+HAnim; `texNNN` = N-ésimo BMR del PKT (con repetidos);
+  partes del boxeador (BRBD cuerpo, BRTK pantalón, BRHD cabeza, BRHA pelo, BRGL guantes, BRSH botas) con
+  raíces propias: se hornean a la pose de enlace global. Pelo/cejas vienen grises (se tiñen).
+  Colores de vértice de los boxeadores = índices de morph (no usar); los de la arena sí (luz horneada).
+- **MTX** "TM" (movimientos): cabecera 44 B (`joint_num, motion_num, motion_adr, frame_adr, rot_adr,
+  loc_adr[2]…`); cuadro clave 16 B `{time, rot_no, loc_no[2], xyz[3], rtb}`; ángulos int16 ×π/2048 con
+  **y,z negados**, R = Rx·Ry·Rz; articulación k = HAnim ID k−1; cadera desde `loc[0]`, el resto `loc[1]`
+  (`loc_no1*24 + k−2`); **traslaciones × 0,235** (trans_scale, ajustado con pies plantados); cada clave se
+  alcanza en `time` ticks (60/s) desde la pose actual (slerp). Raíz a 478 + apoyo dinámico del pie.
+- Movimientos usados (boxer_i2): guardia 0, guardia cerrada 7, jab 790, recto 795, ganchos 548/556,
+  uppers 751/660, cuerpo 793/797, esquivas 133/135/136/137. bx_dmg: 8/11 leve, 9 fuerte, 10/0 cuerpo,
+  12/14 tambaleo. bx_down: caídas 0–34, lona 46, levantada 47. won_bx_chara01: 0. **FEX** = tabla de
+  acciones (transiciones por evento, costo de stamina), semántica de botones en `FR_Item2Act` (sin cerrar).
+- Sonido: HD "IECS"+BD = VAG/PS-ADPCM (`vag.py`); golpes `ip2_hit_seq` (0-3 cara, 9-12 cuerpo, 13 bloqueo,
+  26 lona, 35/36 aire), público `ip2_mom`, gimnasio `ip2_amb_gim` (0 ambiente, 2 campana), árbitro
+  `ip2_refree_eng`. Se guarda el ADPCM y se decodifica al iniciar; mezclador sin bloqueos en AAudio.
+- **APK sin SDK/NDK**: `clang-18 --target=aarch64-linux-android26`, cabeceras propias (`inc/plat.h`,
+  verificadas con AOSP), libs *stub* generadas de los símbolos usados (`compilar.py`), manifest binario
+  propio (`axml.py`, ids de `public-final.xml`, atributos ordenados por id), firma v2+v3 con **apksig
+  compilado desde fuente** (`Firmar.java`) que además verifica. Clave en la carpeta privada: si la sesión
+  es otra, la clave cambia → desinstalar antes de instalar.
+- Pruebas sin teléfono: el mismo motor en Linux con el ANGLE+SwiftShader de Chromium (`main_linux.c`,
+  `IPPO_AUTO=1` pelea CPU vs CPU, `IPPO_POSE=archivo:mov:clave`, `herr/grilla.py` para identificar movs).
+- Siguiente: probar en el TCL; ETC2 + vértices cuantizados; estadio con público (PLACE*); menú y elegir
+  boxeador; música; especiales (sp_move_*), estilos (peek, wild, hit…).
+
 *Si algo de acá no coincide con lo que se ve en el código, manda el código: este archivo es un mapa, no
 la fuente.*

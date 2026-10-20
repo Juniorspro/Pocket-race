@@ -427,5 +427,42 @@ lazurite unpack build/android/RenderChunk.material.bin -o carpeta
 - Siguiente: probar en el TCL; ETC2 + vértices cuantizados; estadio con público (PLACE*); menú y elegir
   boxeador; música; especiales (sp_move_*), estilos (peek, wild, hit…).
 
+---
+
+## 12. Super-Human (juego propio para Rezona, HTML único)
+
+- Pedido: simulador de superhéroes, mundo abierto vóxel, todo en inglés, sin emojis, para WebView
+  (TCL 20 SE). Entregado **v1** (`Super-Human-v1.html`, ~900 KB, no pide nada a la red). Fase siguiente:
+  poderes y situaciones (crímenes, rescates). El juego no va al repo; el HTML entregado es la fuente.
+- Motor propio WebGL2, sin librerías. En el HTML, módulos separados por `/*==== módulo: X ====*/`, en orden:
+  util, gl, audio, ui, space, voxel, char, anim, charrender, creator, city, props, citymesh, cityrender,
+  input, hud, npc, traffic, world, main. Armado: `shell.html` + `ui.css` + módulos → `/*@CSS@*/`, `/*@JS@*/`
+  (IIFE con "use strict"), `@@FONT@@` (Oswald, OFL), `@@DAY@@`/`@@AUX@@` (Tierra), `@@VERSION@@`.
+- Tierra del menú (NASA, dominio público): día = Blue Marble NG julio (WebP 2048×1024); aux = R nubes,
+  G luces nocturnas, B máscara de agua. Halo de atmósfera por rayo; Vía Láctea horneada una vez. La esfera
+  es CCW (con `frontFace(CW)` se ve el interior y todo sale celeste).
+- Personajes: rejilla de 2 cm. Cuerpo = SDF por hueso (unión suave sólo dentro de la misma cadena), cabeza
+  diseñada vóxel a vóxel (8×12×10: ojos fila 6, cejas 7 salientes, nariz 4-5, boca 2), 18 peinados, ropa y
+  trajes pintados por zona, capa con 3 huesos. 20 huesos rígidos, paleta de 17 ranuras por instancia (color
+  sin rehacer malla), LOD 2/4/8 cm con `VGrid.half()`. Vértice de 12 B (pos Int16 en 2 mm + hueso; u8
+  normal/ranura/tono/AO).
+- Animación procedural, Euler Ry·Rx·Rz (brazo/pierna adelante = X negativo, rodilla flexión = X positivo):
+  reposo, locomoción con fase por velocidad, aire, golpes por cuadros clave (jab, cross, hook, upper, kick),
+  reacciones, caída y levantada, agacharse, gestos.
+- Ciudad (semilla 20260): 9×10 manzanas de 100×80 m, calles de 14 m (2 carriles por mano), veredas de 4 m,
+  costanera con muro. Trozos de 200×160 m: fachadas (ventanas procedurales en el shader) + suelo/detalles
+  (material por vértice) + mobiliario y autos por instancias. Posiciones Int16 a 1/64 m; el horizonte va a
+  1/4 m (a 1/64 desborda y tapa la ciudad con triángulos gigantes).
+- Sombras: mapa de profundidad que sigue al jugador (re-horneado al alejarse 45 % del radio), comparación
+  por hardware. Downtown queda a la sombra de las torres: es real, no un error.
+- Tránsito: conectores Bézier en las intersecciones, semáforos (ciclo 34 s), frenan por autos/peatones/
+  jugador. Civiles: grafo de veredas y sendas, esperan el semáforo, huyen, se agachan, reciben golpes.
+- Pruebas (Playwright + SwiftShader): `?test=menu|creator|game`; pasos eval/click/key/down/up/wait/shot;
+  `Creator.lineup = [specs]` (+ `lineSeq`) para comparar personajes y poses; `World.debugCam = {eye, tgt}`
+  para vistas aéreas; CPU frenada ×6 por CDP para medir; juego al azar 75 s sin errores. En GLSL `patch` es
+  palabra reservada.
+- Medido: ~25 llamadas de dibujo y ~32 k triángulos en la calle; JS < 1.5 ms por cuadro en PC. El TCL arranca
+  en calidad Media (Adreno 610) con resolución adaptable (baja rápido, sube lento).
+
 *Si algo de acá no coincide con lo que se ve en el código, manda el código: este archivo es un mapa, no
 la fuente.*

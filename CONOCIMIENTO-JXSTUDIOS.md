@@ -432,7 +432,7 @@ lazurite unpack build/android/RenderChunk.material.bin -o carpeta
 ## 12. Super-Human (juego propio para Rezona, HTML único)
 
 - Pedido: simulador de superhéroes, mundo abierto vóxel, todo en inglés, sin emojis, para WebView
-  (TCL 20 SE). Entregado **v4** (`Super-Human-v4.html`, ~950 KB, no pide nada a la red). Fase siguiente:
+  (TCL 20 SE). Entregado **v5** (`Super-Human-v5.html`, ~1 MB, no pide nada a la red). Fase siguiente:
   poderes y situaciones (crímenes, rescates). El juego no va al repo; el HTML entregado es la fuente.
 - Motor propio WebGL2, sin librerías. En el HTML, módulos separados por `/*==== módulo: X ====*/`, en orden:
   util, gl, audio, ui, space, voxel, char, anim, charrender, creator, city, props, citymesh, cityrender,
@@ -472,6 +472,14 @@ lazurite unpack build/android/RenderChunk.material.bin -o carpeta
   ragdoll PBD de 20 partículas, límites de cono en cadera (ángulo sagital + apertura), bisagras, "músculos" hacia una pose de
   protección que se apagan a los 1,4 s, levantarse con mezcla de matrices (cuaterniones) hacia `Anim.getup` (boca arriba/abajo).
   Líneas del piso: corrimiento de profundidad según distancia en el shader del suelo. `World.knock(vx,vz,spd)` prueba el atropello.
+- **v5**: 17 huesos (sin huesos de capa/falda). `cloth.js` = tela PBD de verdad (capa 9×11 anclada en arco de hombro a hombro
+  por la nuca; falda tubo 18×6 en la cintura), anclajes de largo alcance, arrastre por normal, colisión con cápsulas, se dibuja de los dos
+  lados (programa `cloth`). Personajes instanciados: `CharGL.draw` COPIA huesos/paleta (el creador reusa el arreglo) y `flush` agrupa por
+  malla con `drawElementsInstanced` (fila = uRow + gl_InstanceID, destello en el texel 69). Civiles: rejilla de vecinos, fuerza social
+  (mira 3,4 m adelante, esquiva al costado libre, frena), carril por la derecha, parejas, mirar al jugador, empujones; densidad 32/50/72/96.
+  Bug del "piso que desaparece": la caja de culling de cada trozo es la real de sus vértices (las piezas se pasaban del borde nominal).
+  Cámara ≥ 0,75 m sobre el piso. Fachadas: ventanas con interior por paralaje, marcos, alféizares, persianas; locales con vidriera,
+  estantes y carteles con letras. Patada circular verificada numéricamente (pie a 1,3 m y 1 m adelante); esquive = rodada (`Anim.roll`).
 - Medido: ~25 llamadas de dibujo y ~32 k triángulos en la calle; JS < 1.5 ms por cuadro en PC. El TCL arranca
   en calidad Media (Adreno 610) con resolución adaptable (baja rápido, sube lento).
 

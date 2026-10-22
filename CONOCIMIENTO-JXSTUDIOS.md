@@ -43,6 +43,7 @@
 - No dejar agentes ni procesos en segundo plano. Las corridas largas en segundo plano "sólo gastan
   tokens": pruebas cortas, dirigidas, en primer plano.
 - No retomar el porteo de Geometry Dash (está cerrado).
+- **Prohibido usar Higgsfield** (ninguna de sus herramientas: imágenes, video, 3D, audio, sitios).
 
 ### 1.2 De seguridad
 - Repo **público**: nunca datos del juego, código de terceros o descompilado, secretos, keystores ni

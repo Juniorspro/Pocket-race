@@ -432,7 +432,7 @@ lazurite unpack build/android/RenderChunk.material.bin -o carpeta
 ## 12. Super-Human (juego propio para Rezona, HTML único)
 
 - Pedido: simulador de superhéroes, mundo abierto vóxel, todo en inglés, sin emojis, para WebView
-  (TCL 20 SE). Entregado **v3** (`Super-Human-v3.html`, ~900 KB, no pide nada a la red). Fase siguiente:
+  (TCL 20 SE). Entregado **v4** (`Super-Human-v4.html`, ~950 KB, no pide nada a la red). Fase siguiente:
   poderes y situaciones (crímenes, rescates). El juego no va al repo; el HTML entregado es la fuente.
 - Motor propio WebGL2, sin librerías. En el HTML, módulos separados por `/*==== módulo: X ====*/`, en orden:
   util, gl, audio, ui, space, voxel, char, anim, charrender, creator, city, props, citymesh, cityrender,
@@ -465,6 +465,13 @@ lazurite unpack build/android/RenderChunk.material.bin -o carpeta
   paletas van en texturas RGBA32F leídas con `texelFetch` (una fila por dibujo, `CharGL.begin/draw/flush`);
   normales por cálculo; sombras sólo en el shader de píxeles. Al arrancar se compilan todos los programas y la
   pantalla de error lista los que fallen, con build y GPU.
+- **v4** (dueño en créditos: **Goshumio**): 24 huesos (capa en 5 tramos, falda en 2 mitades); textura de datos de 92 texeles
+  (huesos 0-71, paleta desde 72). Altura por especie (`Char.HEIGHTS`, humano 1,50-2,47 m): el modelo vóxel cubre 1,50-1,92 m y lo
+  demás es escala en la matriz raíz (`J.scale`, `J.Ht`). `body.js`: capa = cadena de 6 puntos con colisión contra cápsulas del cuerpo
+  y tope (no sube de los hombros ni pasa adelante); falda = cada mitad copia el giro del muslo al 85 % (8 paños rígidos se deshilachan);
+  ragdoll PBD de 20 partículas, límites de cono en cadera (ángulo sagital + apertura), bisagras, "músculos" hacia una pose de
+  protección que se apagan a los 1,4 s, levantarse con mezcla de matrices (cuaterniones) hacia `Anim.getup` (boca arriba/abajo).
+  Líneas del piso: corrimiento de profundidad según distancia en el shader del suelo. `World.knock(vx,vz,spd)` prueba el atropello.
 - Medido: ~25 llamadas de dibujo y ~32 k triángulos en la calle; JS < 1.5 ms por cuadro en PC. El TCL arranca
   en calidad Media (Adreno 610) con resolución adaptable (baja rápido, sube lento).
 
